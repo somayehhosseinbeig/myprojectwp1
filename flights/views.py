@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import *
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.urls import reverse
 
 # Create your views here.
@@ -18,9 +18,16 @@ def flight(request, flight_id):
 
 def book(request, flight_id):
     if request.method == "POST":
-        flight = Flight.objects.get(pk=flight_id)
-        passenger_id = int(request.POST["passenger"])
-        passenger = Passenger.objects.get(pk=passenger_id)
+        try:
+            passenger = Passenger.objects.get(pk=int(request.POST["passenger"]))
+            flight = Flight.objects.get(pk=flight_id)
+        except KeyError:
+            return HttpResponseBadRequest("Bad Request: no flight chosen")
+        except Flight.DoesNotExist:
+            return HttpResponseBadRequest("Bad Request: flight does not exist")
+        except Passenger.DoesNotExist:
+            return HttpResponseBadRequest("Bad Request: passenger does not exist")
+      
         passenger.flights.add(flight)
         return HttpResponseRedirect(reverse("flight", args=(flight.id,))) # pyright: ignore[reportAttributeAccessIssue]
 
