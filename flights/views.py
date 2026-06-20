@@ -35,4 +35,4 @@ def book(request, flight_id):
         except Passenger.DoesNotExist:
             return HttpResponseBadRequest("Bad Request: passenger does not exist")
         passenger.flights.add(flight)
-        return HttpResponseRedirect(reverse("flight", args=(flight_id,)))
+        return HttpResponseRedirect(reverse("flights:flight", args=(flight_id,)))
